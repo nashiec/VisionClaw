@@ -1,0 +1,55 @@
+name: Build VisionClaw APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Create local.properties
+        working-directory: samples/CameraAccessAndroid
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "github_token=${{ secrets.GH_PACKAGES_TOKEN }}" >> local.properties
+
+      - name: Create Secrets.kt
+        working-directory: samples/CameraAccessAndroid/app/src/main/java/com/meta/wearable/dat/externalsampleapps/cameraaccess
+        run: |
+          cat > Secrets.kt << 'KOTLIN'
+          package com.meta.wearable.dat.externalsampleapps.cameraaccess
+
+          object Secrets {
+              const val geminiAPIKey = "${{ secrets.GEMINI_API_KEY }}"
+              const val openClawHost = "http://192.168.2.74"
+              const val openClawPort = 18789
+              const val openClawHookToken = ""
+              const val openClawGatewayToken = "${{ secrets.OPENCLAW_GATEWAY_TOKEN }}"
+              const val webrtcSignalingURL = ""
+          }
+          KOTLIN
+
+      - name: Build debug APK
+        working-directory: samples/CameraAccessAndroid
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: visionclaw-debug
+          path: samples/CameraAccessAndroid/app/build/outputs/apk/debug/*.apk
+          retention-days: 30
