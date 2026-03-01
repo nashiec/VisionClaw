@@ -29,19 +29,26 @@ jobs:
 
       - name: Create Secrets.kt
         working-directory: samples/CameraAccessAndroid/app/src/main/java/com/meta/wearable/dat/externalsampleapps/cameraaccess
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENCLAW_TOKEN: ${{ secrets.OPENCLAW_GATEWAY_TOKEN }}
         run: |
-          cat > Secrets.kt << 'KOTLIN'
+          cat > Secrets.kt <<EOF
           package com.meta.wearable.dat.externalsampleapps.cameraaccess
 
           object Secrets {
-              const val geminiAPIKey = "${{ secrets.GEMINI_API_KEY }}"
+              const val geminiAPIKey = "${GEMINI_KEY}"
               const val openClawHost = "http://192.168.2.74"
               const val openClawPort = 18789
               const val openClawHookToken = ""
-              const val openClawGatewayToken = "${{ secrets.OPENCLAW_GATEWAY_TOKEN }}"
+              const val openClawGatewayToken = "${OPENCLAW_TOKEN}"
               const val webrtcSignalingURL = ""
           }
-          KOTLIN
+          EOF
+
+      - name: Fix gradle.properties Java home
+        working-directory: samples/CameraAccessAndroid
+        run: sed -i "s|org.gradle.java.home=.*|org.gradle.java.home=$JAVA_HOME|" gradle.properties
 
       - name: Build debug APK
         working-directory: samples/CameraAccessAndroid
