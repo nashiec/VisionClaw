@@ -56,18 +56,6 @@ fun HomeScreen(
   val context = LocalContext.current
 
   Box(modifier = modifier.fillMaxSize()) {
-    // Settings gear (top-right)
-    Box(modifier = Modifier.align(Alignment.TopEnd).systemBarsPadding().padding(8.dp)) {
-      IconButton(onClick = { viewModel.showSettings() }) {
-        Icon(
-            imageVector = Icons.Default.Settings,
-            contentDescription = "Settings",
-            tint = Color.Gray,
-            modifier = Modifier.size(28.dp),
-        )
-      }
-    }
-
     Column(
         modifier =
             Modifier
@@ -134,6 +122,18 @@ fun HomeScreen(
         SwitchButton(
             label = "Start on Phone",
             onClick = { viewModel.navigateToPhoneMode() },
+        )
+      }
+    }
+
+    // Settings gear (top-right) - must be AFTER Column so it draws on top and receives touches
+    Box(modifier = Modifier.align(Alignment.TopEnd).systemBarsPadding().padding(8.dp)) {
+      IconButton(onClick = { viewModel.showSettings() }) {
+        Icon(
+            imageVector = Icons.Default.Settings,
+            contentDescription = "Settings",
+            tint = Color.Gray,
+            modifier = Modifier.size(28.dp),
         )
       }
     }
