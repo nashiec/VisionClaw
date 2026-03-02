@@ -42,6 +42,7 @@ class GeminiSessionViewModel : ViewModel() {
     private val audioManager = AudioManager()
     private var lastVideoFrameTime: Long = 0
     private var stateObservationJob: Job? = null
+    private val _toolCallInFlight = MutableStateFlow(false)
 
     var streamingMode: StreamingMode = StreamingMode.GLASSES
 
@@ -61,6 +62,9 @@ class GeminiSessionViewModel : ViewModel() {
         audioManager.onAudioCaptured = lambda@{ data ->
             // Phone mode: mute mic while model speaks to prevent echo
             if (streamingMode == StreamingMode.PHONE && geminiService.isModelSpeaking.value) return@lambda
+            // Mute audio sending while a tool call is in flight to prevent
+            // ambient noise from reaching Gemini's activity detection
+            if (_toolCallInFlight.value) return@lambda
             geminiService.sendAudio(data)
         }
 
@@ -107,10 +111,17 @@ class GeminiSessionViewModel : ViewModel() {
             toolCallRouter = ToolCallRouter(openClawBridge, viewModelScope)
 
             geminiService.onToolCall = { toolCall ->
+                _toolCallInFlight.value = true
                 for (call in toolCall.functionCalls) {
-                    toolCallRouter?.handleToolCall(call) { response ->
-                        geminiService.sendToolResponse(response)
-                    }
+                    toolCallRouter?.handleToolCall(
+                        call = call,
+                        sendResponse = { response ->
+                            geminiService.sendToolResponse(response)
+                        },
+                        onComplete = {
+                            _toolCallInFlight.value = false
+                        }
+                    )
                 }
             }
 

@@ -19,7 +19,8 @@ class ToolCallRouter(
 
     fun handleToolCall(
         call: GeminiFunctionCall,
-        sendResponse: (JSONObject) -> Unit
+        sendResponse: (JSONObject) -> Unit,
+        onComplete: (() -> Unit)? = null
     ) {
         val callId = call.id
         val callName = call.name
@@ -43,6 +44,7 @@ class ToolCallRouter(
             Log.d(TAG, "Result for $callName (id: $callId): $truncatedResult")
             val response = buildToolResponse(callId, callName, truncatedResult)
             sendResponse(response)
+            onComplete?.invoke()
 
             inFlightJobs.remove(callId)
         }
@@ -81,6 +83,7 @@ class ToolCallRouter(
                     put("name", name)
                     put("response", result.toJSON())
                 }))
+                put("scheduling", "WHEN_IDLE")
             })
         }
     }

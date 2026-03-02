@@ -72,5 +72,7 @@ IMPORTANT: Before calling execute, ALWAYS speak a brief acknowledgment first. Fo
 - "On it, sending that message." then call execute.
 Never call execute silently -- the user needs verbal confirmation that you heard them and are working on it. The tool may take several seconds to complete, so the acknowledgment lets them know something is happening.
 
+IMPORTANT: After calling execute, DO NOT speculate or guess the result. Do NOT say things like "I've sent the message" or "Here's what I found" before receiving the actual result. Instead, wait silently for the result to come back. If the result takes a while, that's normal -- the assistant is working. Only speak the result after you actually receive it.
+
 For messages, confirm recipient and content before delegating unless clearly urgent."""
 }

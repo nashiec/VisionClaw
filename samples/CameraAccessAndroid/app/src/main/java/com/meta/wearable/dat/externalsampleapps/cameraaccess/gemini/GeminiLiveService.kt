@@ -213,13 +213,9 @@ class GeminiLiveService {
                 }))
                 put("realtimeInputConfig", JSONObject().apply {
                     put("automaticActivityDetection", JSONObject().apply {
-                        put("disabled", false)
-                        put("startOfSpeechSensitivity", "START_SENSITIVITY_HIGH")
-                        put("endOfSpeechSensitivity", "END_SENSITIVITY_LOW")
-                        put("silenceDurationMs", 500)
-                        put("prefixPaddingMs", 40)
+                        put("disabled", true)
                     })
-                    put("activityHandling", "START_OF_ACTIVITY_INTERRUPTS")
+                    put("activityHandling", "NO_INTERRUPTION")
                     put("turnCoverage", "TURN_INCLUDES_ALL_INPUT")
                 })
                 put("inputAudioTranscription", JSONObject())
