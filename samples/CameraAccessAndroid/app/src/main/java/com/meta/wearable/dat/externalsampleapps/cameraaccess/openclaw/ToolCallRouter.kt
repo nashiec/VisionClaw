@@ -30,13 +30,19 @@ class ToolCallRouter(
             val taskDesc = call.args["task"]?.toString() ?: call.args.toString()
             val result = bridge.delegateTask(task = taskDesc, toolName = callName)
 
-            if (!coroutineContext[Job]!!.isCancelled) {
-                Log.d(TAG, "Result for $callName (id: $callId): $result")
-                val response = buildToolResponse(callId, callName, result)
-                sendResponse(response)
-            } else {
-                Log.d(TAG, "Task $callId was cancelled, skipping response")
+            // Always send the response even if Gemini cancelled the tool call,
+            // because the work was already completed on the server side.
+            val truncatedResult = when (result) {
+                is ToolResult.Success -> ToolResult.Success(
+                    result.result.take(2000).let {
+                        if (result.result.length > 2000) "$it... [truncated]" else it
+                    }
+                )
+                is ToolResult.Failure -> result
             }
+            Log.d(TAG, "Result for $callName (id: $callId): $truncatedResult")
+            val response = buildToolResponse(callId, callName, truncatedResult)
+            sendResponse(response)
 
             inFlightJobs.remove(callId)
         }
