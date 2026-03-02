@@ -148,9 +148,9 @@ class GeminiSessionViewModel : ViewModel() {
                     return@connect
                 }
 
-                // Start mic capture
+                // Start mic capture (pass mode so phone uses speaker, not earpiece)
                 try {
-                    audioManager.startCapture()
+                    audioManager.startCapture(mode = streamingMode)
                 } catch (e: Exception) {
                     _uiState.value = _uiState.value.copy(
                         errorMessage = "Mic capture failed: ${e.message}"

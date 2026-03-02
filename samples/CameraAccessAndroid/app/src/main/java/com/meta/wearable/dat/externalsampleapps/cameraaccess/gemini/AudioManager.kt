@@ -7,6 +7,7 @@ import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
 import android.util.Log
+import com.meta.wearable.dat.externalsampleapps.cameraaccess.stream.StreamingMode
 import java.io.ByteArrayOutputStream
 
 class AudioManager {
@@ -26,7 +27,7 @@ class AudioManager {
     private val accumulateLock = Any()
 
     @SuppressLint("MissingPermission")
-    fun startCapture() {
+    fun startCapture(mode: StreamingMode = StreamingMode.GLASSES) {
         if (isCapturing) return
 
         val bufferSize = AudioRecord.getMinBufferSize(
@@ -43,10 +44,16 @@ class AudioManager {
             bufferSize
         )
 
+        // Phone mode: use MEDIA usage to route to speaker instead of earpiece
+        val audioUsage = if (mode == StreamingMode.PHONE)
+            AudioAttributes.USAGE_MEDIA
+        else
+            AudioAttributes.USAGE_VOICE_COMMUNICATION
+
         audioTrack = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                    .setUsage(audioUsage)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build()
             )
